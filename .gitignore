@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Runtime state written next to your policy file
+.guardrail/
+
+# Local config and secrets
+.env
+.env.*
+policy.local.yaml
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

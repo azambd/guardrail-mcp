@@ -1,0 +1,82 @@
+# guardrail-mcp policy
+#
+# Copy to policy.yaml and edit. Anything not explicitly allowed is denied:
+# an empty repos.allow means the agent can reach nothing.
+# Validate with:  guardrail-mcp check --policy policy.yaml
+
+version: 1
+
+# live: writes happen. dry_run: every write returns a preview and changes nothing.
+mode: live
+
+repos:
+  allow:
+    - your-org/your-repo        # exact owner/name
+    # - your-org/*              # every repo in an org
+  deny:
+    - your-org/infra            # deny wins over allow
+
+tools:
+  # Tools the agent may call freely. Tools not listed anywhere are hidden:
+  # they are never registered, so the agent cannot see or call them.
+  allow:
+    - get_repo
+    - list_issues
+    - get_issue
+    - search_code
+    - get_file
+    - list_pull_requests
+    - get_pull_request
+    - get_ci_status
+    - create_issue
+    - comment_on_issue
+    - add_labels
+    - create_branch
+    - commit_file
+    - open_pull_request
+    - rerun_failed_jobs
+  # Tools that pause until a human runs `guardrail-mcp approvals approve <id>`.
+  require_approval:
+    - close_issue
+  # merge_pull_request is left out on purpose. Add it to require_approval if
+  # you ever want the agent to merge, never to allow.
+
+branches:
+  agent_prefix: "agent/"        # the only branches the agent may create or commit to
+  protected: ["main", "master", "release/*"]
+
+paths:
+  deny_write:                   # never written, even on an agent branch
+    - ".github/workflows/**"    # an agent editing CI can grant itself new powers
+    - ".env"
+    - ".env.*"
+    - "**/*.pem"
+    - "**/*.key"
+  deny_read:                    # never returned to the model
+    - ".env"
+    - ".env.*"
+    - "**/*.pem"
+    - "**/*.key"
+
+pull_requests:
+  force_draft: true             # a human marks it ready for review
+  allowed_bases: ["main"]
+
+limits:
+  max_writes_per_session: 25    # one server process is one agent session
+  max_text_chars: 20000         # issue bodies, comments, commit messages
+  max_file_bytes: 200000        # single file read or commit
+  idempotency_window_seconds: 600
+  approval_ttl_seconds: 3600
+
+content:
+  block_secrets: true           # refuse writes that contain credentials
+  redact_secrets_in_reads: true # scrub credentials from anything the model reads
+  extra_secret_patterns: []     # your own regexes, e.g. internal token formats
+
+audit:
+  path: .guardrail/audit.jsonl  # relative paths resolve from this file's folder
+  max_arg_chars: 300            # long arguments are truncated in the log
+
+state:
+  path: .guardrail/state.db     # approvals and idempotency records

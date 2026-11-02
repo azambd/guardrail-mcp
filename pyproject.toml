@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "guardrail-mcp"
+version = "0.1.0"
+description = "A policy-enforced MCP server that gives AI coding agents scoped, audited access to GitHub."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Faruque Azam" }]
+requires-python = ">=3.10"
+keywords = ["mcp", "model-context-protocol", "ai-agents", "guardrails", "github", "claude", "audit-log"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Security",
+]
+dependencies = [
+    "mcp>=2.3,<3",
+    "httpx2>=2.13",
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "anyio>=4"]
+
+[project.scripts]
+guardrail-mcp = "guardrail_mcp.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/azambd/guardrail-mcp"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
